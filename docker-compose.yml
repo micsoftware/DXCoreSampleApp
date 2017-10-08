@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  dxcoresampleapp.web:
+    image: dxcoresampleapp.web
+    build:
+      context: ./DXCoreSampleApp.Web
+      dockerfile: Dockerfile
