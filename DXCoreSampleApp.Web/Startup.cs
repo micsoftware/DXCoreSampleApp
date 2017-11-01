@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using DXCoreSampleApp.Common.Data;
 using Microsoft.Extensions.Configuration;
 using DXCoreSampleApp.Service.Contacts;
+using DXCoreSampleApp.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace DXCoreSampleApp.Web
 {
@@ -25,32 +27,40 @@ namespace DXCoreSampleApp.Web
         {
             services.AddMvc();
 
-            var connectringString = Configuration.GetSection("ConnectionStrings:DevelopmentConnection").Value;            
-            //var connectringString = Configuration.GetConnectionString("DevelopmentConnection");
+            //var connectringString = Configuration.GetSection("ConnectionStrings:DevelopmentConnection").Value;
+            var connectringString = Configuration.GetConnectionString("DevelopmentConnection");
             services.AddDbContext<DatabaseContext>(o => o.UseSqlServer(connectringString));
+
+            services.AddDbContext<ApplicationDbContext>(o => o.UseSqlServer(connectringString));
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
 
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddTransient<IContactService, ContactService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory logger, 
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory logger,
             DatabaseContext context)
         {
             logger.AddConsole();
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();                
+                app.UseDeveloperExceptionPage();
+                //context.EnsureSeedDataForContext();
+                app.UseBrowserLink();
+                app.UseDatabaseErrorPage();
             }
 
-            context.EnsureSeedDataForContext();
-
             app.UseStaticFiles();
-            app.UseBrowserLink();
             app.UseFileServer();
             app.UseStatusCodePages();
-            
+
+            app.UseAuthentication();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

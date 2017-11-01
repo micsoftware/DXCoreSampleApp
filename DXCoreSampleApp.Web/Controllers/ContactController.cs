@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using DXCoreSampleApp.Service.Contacts;
+using DXCoreSampleApp.Identity;
+using Microsoft.AspNetCore.Identity;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,9 +17,20 @@ namespace DXCoreSampleApp.Web.Controllers
     public class ContactController : BaseController
     {       
         private readonly IContactService _contactService;
-        public ContactController(IContactService contactService)
+        private readonly UserManager<ApplicationUser> userManager;
+
+        public ContactController(IContactService contactService,
+            UserManager<ApplicationUser> userManager)
         {
             _contactService = contactService;
+            this.userManager = userManager;
+        }
+
+        [HttpGet("currentuser")]
+        public IActionResult GetCurrentUser()
+        {
+            //var user = userManager.GetUserName
+            return Ok(User.Identity);
         }
 
         // GET: api/values
